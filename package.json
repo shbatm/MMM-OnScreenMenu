@@ -1,0 +1,24 @@
+{
+  "name": "MMM-OnScreenMenu",
+  "version": "0.0.9",
+  "description": "Module to provide a simple on-screen menu for controlling the mirror",
+  "main": "MMM-OnScreenMenu.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shbatm/MMM-OnScreenMenu.git"
+  },
+  "keywords": [
+    "MagicMirror",
+    "menu",
+    "remote control",
+    "on-screen menu"
+  ],
+  "author": "shbatm",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/shbatm/MMM-OnScreenMenu/issues"
+  },
+  "homepage": "https://github.com/shbatm/MMM-OnScreenMenu#readme",
+  "dependencies": {
+  }
+}
