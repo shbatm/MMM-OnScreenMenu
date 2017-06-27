@@ -187,7 +187,7 @@ Module.register("MMM-OnScreenMenu", {
         if (typeof modules !== "undefined") {
             modules.forEach(k => {
                 if (action.indexOf("Hide") > -1 ||
-                    (action.indexOf("Toggle") > -1 && k.hidden)) {
+                    (action.indexOf("Toggle") > -1 && !k.hidden)) {
                     console.log(`Hiding ${this.config.menuItems[action].name}`);
                     k.hide(0, { lockString: "osm" });
                 } else if (action.indexOf("Show") > -1 ||
