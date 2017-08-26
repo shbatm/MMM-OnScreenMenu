@@ -33,7 +33,7 @@ The menu is designed to be controllable from multiple devices:
 
 ```shell
 cd ~/MagicMirror/modules
-git clone https://github.com/shbatm/MMM-KeyBindings
+git clone https://github.com/shbatm/MMM-OnScreenMenu
 ```
 
 ## Using the module
@@ -140,6 +140,29 @@ Any valid menu item can be called from another module by sending a notification 
 
 ```js
 this.sendNotification('ONSCREENMENU_PROCESS_ACTION', 'menuItemName');
+```
+
+#### Sample Configuration (Default)
+
+You can copy and paste the following into your config file modules section for a starting point.
+
+```js
+{
+    module: 'MMM-OnScreenMenu',
+    position: 'bottom_right',
+    /* Valid positions: 'top_right', 'top_left', 'bottom_right', 'bottom_left' */
+    config: {
+        touchMode: true,
+        menuItems: {
+            monitorOff: { title: "Turn Off Monitor", icon: "television", source: "SERVER" },
+            restart: { title: "Restart MagicMirror", icon: "recycle", source: "ALL" },
+            refresh: { title: "Refresh MagicMirror", icon: "refresh", source: "LOCAL" },
+            reboot: { title: "Reboot", icon: "spinner", source: "ALL" },
+            shutdown: { title: "Shutdown", icon: "power-off", source: "ALL" },
+        },
+        enableKeyboard: true,
+    }
+},
 ```
 
 #### KeyBindings Config <a name="keybindings-config"></a>
