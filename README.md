@@ -34,6 +34,8 @@ The menu is designed to be controllable from multiple devices:
 ```shell
 cd ~/MagicMirror/modules
 git clone https://github.com/shbatm/MMM-OnScreenMenu
+cd MMM-OnScreenMenu/
+npm install
 ```
 
 ## Using the module
