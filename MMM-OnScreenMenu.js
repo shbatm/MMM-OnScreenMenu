@@ -10,6 +10,7 @@
 Module.register("MMM-OnScreenMenu", {
     defaults: {
         touchMode: true,
+        menuName: "MAIN",
         menuItems: {
             monitorOff: { title: "Turn Off Monitor", icon: "television", source: "SERVER" },
             restart: { title: "Restart MagicMirror", icon: "recycle", source: "ALL" },
@@ -39,6 +40,7 @@ Module.register("MMM-OnScreenMenu", {
     manualOpen: false,
     menuOpen: false,
     selectedMenuItem: '',
+    actionTimers: {},
 
     start: function() {
         console.log(this.name + " has started...");
@@ -113,20 +115,46 @@ Module.register("MMM-OnScreenMenu", {
         if (notification === "ONSCREENMENU_PROCESS_ACTION") {
             this.doMenuAction(payload);
         }
+        if (notification === "ONSCREENMENU_TOGGLE_MENU") {
+            if ((typeof payload === "object" && "menuName" in payload && payload.menuName === this.config.menuName) || typeof payload !== "object") {
+                this.toggleMenu();
+            }
+        }
+        if (notification === "ONSCREENMENU_BY_NUMBER") {
+            if (typeof payload === "object" && "menuName" in payload && payload.menuName === this.config.menuName) {
+                this.clickByNumber(payload.itemNumber);
+            }
+            if (typeof payload === "number") {
+                this.clickByNumber(payload);
+            }
+        }
     },
 
     /********** ON SCREEN MENU FUNCTIONS **********/
+    clickByNumber: function(itemNumber) {
+        if (!this.menuOpen) {
+            // Correct menu must be opened first
+            return;
+        }
+        var k = Object.keys(this.config.menuItems);
+        if (itemNumber < 0 || itemNumber >= k.length) {
+            // Invalid selection
+            return;
+        }
+        this.doMenuAction(k[itemNumber]);
+    },
+
     clearSelection: function() {
         var k = Object.keys(this.config.menuItems);
         k.forEach(s => {
-            var item = document.getElementById(`osm_${s}`);
+            var item = document.getElementById(`osm${this.config.menuName}_${s}`);
             item.classList.remove("selected");
         });
         this.selectedMenuItem = '';
     },
 
     toggleMenu: function(forceClose) {
-        var menu = document.getElementById("osm");
+        var menu = document.getElementById("osm" + this.config.menuName);
         // console.log(`Hovering: ${this.hovering}, Manual: ${this.manualOpen}, Open: ${this.menuOpen}, forceClose: ${forceClose}`);
         if (forceClose || this.manualOpen) {
             this.clearSelection();
@@ -154,29 +182,54 @@ Module.register("MMM-OnScreenMenu", {
     },
 
     doMenuAction: function(action) {
-        console.log(`OSM Menu Item Clicked: ${action}`);
+        var actionDetail = {};
+        if (typeof action === "object") {
+            actionDetail = action;
+            actionName = actionDetail.actionName;
+        } else {
+            actionName = action;
+            actionDetail = this.config.menuItems[action];
+        }
+
+        console.log(`OSM Menu Item Clicked: ${actionName}\n${JSON.stringify(actionDetail)}`);
 
         var nodeActions = ["monitorOn", "monitorOff", "monitorToggle", "restart", "reboot", "shutdown"];
 
         // Module Actions
-        if (action.startsWith("module")) {
-            this.handleModuleAction(action);
-        } else if (action.startsWith("notify")) {
-            this.sendNotification(this.config.menuItems[action].notification,
-                this.config.menuItems[action].payload);
-        } else if (nodeActions.indexOf(action) !== -1) {
-            this.sendSocketNotification("PROCESS_ACTION", action);
-        } else if (action === "refresh") {
+        if (actionName.startsWith("module")) {
+            this.handleModuleAction(actionName);
+        } else if (actionName.startsWith("notify")) {
+            this.sendNotification(actionDetail.notification,
+                actionDetail.payload);
+        } else if (nodeActions.indexOf(actionName) !== -1) {
+            this.sendSocketNotification("PROCESS_ACTION", actionName);
+        } else if (actionName === "refresh") {
             window.location.reload(true);
-        } else if (action === "toggleTouchMode") {
+        } else if (actionName === "toggleTouchMode") {
             this.toggleTouchMode();
-        } else if (action.startsWith("changeMenuPosition_")) {
-            this.changeMenuPosition(action.replace("changeMenuPosition_", ""));
+        } else if (actionName.startsWith("changeMenuPosition_")) {
+            this.changeMenuPosition(actionName.replace("changeMenuPosition_", ""));
+        } else if (actionName.startsWith("delayed")) {
+            if (!("actionName" in actionDetail)) {
+                actionDetail.actionName = actionName;  
+            }
+            this.delayedAction(actionDetail);
         } else {
-            alert(`Unknown OSM Menu Item Clicked: ${action}`);
+            alert(`Unknown OSM Menu Item Clicked: ${actionName}`);
         }
 
         this.toggleMenu(true);
+    },
+
+    delayedAction: function (timer) {    
+        // Restart the timer
+        if (timer.actionName in this.actionTimers) {
+            clearTimeout(this.actionTimers[timer.actionName]);
+            delete this.actionTimers[timer.actionName];
+        }
+        if (!timer.abort) {
+            this.actionTimers[timer.actionName] = setTimeout(() => { this.doMenuAction(timer.action); }, timer.delay);
+        }
     },
 
     handleModuleAction: function(action) {
@@ -204,7 +257,7 @@ Module.register("MMM-OnScreenMenu", {
             return false;
         }
 
-        var menu = document.getElementById("osm").children[0];
+        var menu = document.getElementById("osm" + this.config.menuName).children[0];
         var k = Object.keys(this.config.menuItems);
         if (!this.selectedMenuItem) {
             this.selectedMenuItem = k[0];
@@ -220,7 +273,7 @@ Module.register("MMM-OnScreenMenu", {
         }
 
         k.forEach(s => {
-            var item = document.getElementById(`osm_${s}`);
+            var item = document.getElementById(`osm${this.config.menuName}_${s}`);
             item.classList.toggle("selected", s === this.selectedMenuItem);
         });
     },
@@ -261,7 +314,7 @@ Module.register("MMM-OnScreenMenu", {
         if (this.config.touchMode) {
             div.classList.add("touchMode");
         }
-        div.id = "osm";
+        div.id = "osm" + this.config.menuName;
 
         var nav = document.createElement("nav");
         nav.id = "menuContainer";
@@ -282,7 +335,7 @@ Module.register("MMM-OnScreenMenu", {
 
         Object.keys(this.config.menuItems).forEach(k => {
             var span = document.createElement("span");
-            span.id = "osm_" + k;
+            span.id = "osm" + this.config.menuName + "_" + k;
             span.innerHTML = `<i class="fa fa-${this.config.menuItems[k].icon}" aria-hidden="true"></i>`;
             span.className = "osmButtons item";
             span.setAttribute("tooltip", this.config.menuItems[k].title);
@@ -320,7 +373,7 @@ Module.register("MMM-OnScreenMenu", {
     /* Function to change position of the menu. 
      * Not used by default, just available from demo */
     changeMenuPosition: function(newPosition) {
-        var menu = document.getElementById("osm");
+        var menu = document.getElementById("osm" + this.config.menuName);
         var nav = menu.children[0];
         menu.classList.toggle("top_left", newPosition === "top_left");
         menu.classList.toggle("top_right", newPosition === "top_right");
@@ -337,7 +390,7 @@ Module.register("MMM-OnScreenMenu", {
     /* Function to toggle "touchMode" of the button (always visible). 
      * Not used by default, just available from demo */
     toggleTouchMode: function() {
-        var menu = document.getElementById("osm");
+        var menu = document.getElementById("osm" + this.config.menuName);
         menu.classList.toggle("touchMode");
     },
 

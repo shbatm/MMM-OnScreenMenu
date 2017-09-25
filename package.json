@@ -1,6 +1,6 @@
 {
   "name": "MMM-OnScreenMenu",
-  "version": "0.0.9",
+  "version": "0.1.1",
   "description": "Module to provide a simple on-screen menu for controlling the mirror",
   "main": "MMM-OnScreenMenu.js",
   "repository": {

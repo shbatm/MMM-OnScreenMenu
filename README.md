@@ -60,6 +60,7 @@ var config = {
 
 | Option                | Description
 |-----------------------|-----------
+| `menuName` | *Optional* - Set the name of the menu. Only needs to be changed if using multiple instances of the module.<br>*Default:* `"MAIN"`.
 | `touchMode` | *Optional* - Enable Touch Mode for the menu.<br>When enabled, the menu button will always be visible and all tooltips will be shown when the menu is open.<br>When disabled, the menu will only appear when hovered over, clicked, or opened with a menu key.<br>*Default:* `true`
 | `enableKeyboard` | *Optional* - Enable basic keyboard control.<br>Menu can be controlled with the `ContextMenu` key (usually next to `Right-Alt`), Arrow Up/Down, and Enter.<br>*Default:* `true`<br><br>*To customize keys:* manually edit the `setupMousetrap` function in `MMM-OnScreenMenu.js`.
 | `enableKeyBindings` | *Optional* - Enable integration with [MMM-KeyBindings](https://github.com/shbatm/MMM-KeyBindings) for bluetooth remote and better keyboard control.  See [KeyBindings Config](#keybindings-config) below.
@@ -133,13 +134,41 @@ menuItems: {
         toggleTouchMode: { title: "Toggle Touch Mode", icon: "eye-slash" }
         changeMenuPosition_top_right: { title: "Move Menu to Top Right", icon: "arrows" }
         ```
++ Delayed Actions:
+    * Perform any of the above actions after a delay - `delayedX`
+    * *`X` is a unique number for each item, e.g. `delayedX` for the first delayed item*
+    * Example - Refresh the browser page after 5 seconds
+        ```js
+        delayed1: {  title: "Delayed Refresh",
+                     icon: "recycle",
+                     action: "refresh", // Name of action to perform
+                     delay: 5000, // Delay in ms
+                  } 
+        ```
+    * Repeatedly calling the menu item restarts the timer.
+    * To add a menu item that cancels a previously started delay, create a second unique menu item (e.g. `delayed2`) and add `actionName: 'itemToCancel', abort: true` to it's config.
+    * Example - Cancel the delayed refresh example above:
+        ```js
+        delayed2: {  title: "Cancel Refresh",
+                     icon: "cancel",
+                     actionName: "delayed1",
+                     abort: true,
+                  } 
+        ```
+
 
 #### Calling actions from another module
 
-Any valid menu item can be called from another module by sending a notification similar to the one below. *Note:* With the exception of module actions, the item passed does NOT actually need to be in the menu; it just needs to be valid.
+Any valid menu item can be called from another module by sending a notification similar to the one below. *Note:* The item passed does NOT actually need to be in the menu's config; it just needs to be valid in the context listed above.
 
 ```js
+// Basic Action Item Notification
 this.sendNotification('ONSCREENMENU_PROCESS_ACTION', 'menuItemName');
+// Advanced Action Item Notification (e.g. module show/hide control, etc.), send payload as an object with the relevent details required.
+//     Example 1: Toggle Clock Module via Notification
+this.sendNotification('ONSCREENMENU_PROCESS_ACTION', { actionName:'moduleToggle1', name: 'clock'})
+//     Example 2: Turn monitor off after a 60-second delay
+this.sendNotification('ONSCREENMENU_PROCESS_ACTION', { actionName:'delayed1', action:'monitorOff', delay: 60000})
 ```
 
 #### Sample Configuration (Default)
@@ -164,6 +193,30 @@ You can copy and paste the following into your config file modules section for a
     }
 },
 ```
+
+#### Controlling the Menu from another module
+
+The menu can be controlled via notifications from another module, for instance buttons using the [MMM-MPR121](https://github.com/PatriceG/MMM-MPR121) module. 
+
+To toggle the menu open/closed:
+```js
+this.sendNotification('ONSCREENMENU_TOGGLE_MENU', '') // Single Menu
+this.sendNotification('ONSCREENMENU_TOGGLE_MENU', { menuName: "MAIN" }) // Multiple Menus
+```
+
+To select an item by it's position in the list, zero-based (e.g. 3rd down = 2):
+```js
+this.sendNotification('ONSCREENMENU_BY_NUMBER', 1) // 2nd item, single menu
+this.sendNotification('ONSCREENMENU_BY_NUMBER', 
+    { menuName:"MAIN",
+      itemNumber: 1
+    }) // 2nd item, multiple menus
+```
+
+To navigate up/down/select using notifications, set `enableKeyBindings: true` in your config (even if you are not using the KeyBindings module) and use the following notification format:
+
+    Notification: 'KEYPRESS'
+    Payload: *see section below for keynames (e.g. ArrowUp for up)*
 
 #### KeyBindings Config <a name="keybindings-config"></a>
 
