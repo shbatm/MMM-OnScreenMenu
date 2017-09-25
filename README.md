@@ -134,13 +134,41 @@ menuItems: {
         toggleTouchMode: { title: "Toggle Touch Mode", icon: "eye-slash" }
         changeMenuPosition_top_right: { title: "Move Menu to Top Right", icon: "arrows" }
         ```
++ Delayed Actions:
+    * Perform any of the above actions after a delay - `delayedX`
+    * *`X` is a unique number for each item, e.g. `delayedX` for the first delayed item*
+    * Example - Refresh the browser page after 5 seconds
+        ```js
+        delayed1: {  title: "Delayed Refresh",
+                     icon: "recycle",
+                     action: "refresh", // Name of action to perform
+                     delay: 5000, // Delay in ms
+                  } 
+        ```
+    * Repeatedly calling the menu item restarts the timer.
+    * To add a menu item that cancels a previously started delay, create a second unique menu item (e.g. `delayed2`) and add `actionName: 'itemToCancel', abort: true` to it's config.
+    * Example - Cancel the delayed refresh example above:
+        ```js
+        delayed2: {  title: "Cancel Refresh",
+                     icon: "cancel",
+                     actionName: "delayed1",
+                     abort: true,
+                  } 
+        ```
+
 
 #### Calling actions from another module
 
-Any valid menu item can be called from another module by sending a notification similar to the one below. *Note:* With the exception of module actions, the item passed does NOT actually need to be in the menu; it just needs to be valid.
+Any valid menu item can be called from another module by sending a notification similar to the one below. *Note:* The item passed does NOT actually need to be in the menu's config; it just needs to be valid in the context listed above.
 
 ```js
+// Basic Action Item Notification
 this.sendNotification('ONSCREENMENU_PROCESS_ACTION', 'menuItemName');
+// Advanced Action Item Notification (e.g. module show/hide control, etc.), send payload as an object with the relevent details required.
+//     Example 1: Toggle Clock Module via Notification
+this.sendNotification('ONSCREENMENU_PROCESS_ACTION', { actionName:'moduleToggle1', name: 'clock'})
+//     Example 2: Turn monitor off after a 60-second delay
+this.sendNotification('ONSCREENMENU_PROCESS_ACTION', { actionName:'delayed1', action:'monitorOff', delay: 60000})
 ```
 
 #### Controlling the Menu from another module

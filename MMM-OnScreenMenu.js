@@ -40,6 +40,7 @@ Module.register("MMM-OnScreenMenu", {
     manualOpen: false,
     menuOpen: false,
     selectedMenuItem: '',
+    actionTimers: {},
 
     start: function() {
         console.log(this.name + " has started...");
@@ -181,29 +182,54 @@ Module.register("MMM-OnScreenMenu", {
     },
 
     doMenuAction: function(action) {
-        console.log(`OSM Menu Item Clicked: ${action}`);
+        var actionDetail = {};
+        if (typeof action === "object") {
+            actionDetail = action;
+            actionName = actionDetail.actionName;
+        } else {
+            actionName = action;
+            actionDetail = this.config.menuItems[action];
+        }
+
+        console.log(`OSM Menu Item Clicked: ${actionName}\n${JSON.stringify(actionDetail)}`);
 
         var nodeActions = ["monitorOn", "monitorOff", "monitorToggle", "restart", "reboot", "shutdown"];
 
         // Module Actions
-        if (action.startsWith("module")) {
-            this.handleModuleAction(action);
-        } else if (action.startsWith("notify")) {
-            this.sendNotification(this.config.menuItems[action].notification,
-                this.config.menuItems[action].payload);
-        } else if (nodeActions.indexOf(action) !== -1) {
-            this.sendSocketNotification("PROCESS_ACTION", action);
-        } else if (action === "refresh") {
+        if (actionName.startsWith("module")) {
+            this.handleModuleAction(actionName);
+        } else if (actionName.startsWith("notify")) {
+            this.sendNotification(actionDetail.notification,
+                actionDetail.payload);
+        } else if (nodeActions.indexOf(actionName) !== -1) {
+            this.sendSocketNotification("PROCESS_ACTION", actionName);
+        } else if (actionName === "refresh") {
             window.location.reload(true);
-        } else if (action === "toggleTouchMode") {
+        } else if (actionName === "toggleTouchMode") {
             this.toggleTouchMode();
-        } else if (action.startsWith("changeMenuPosition_")) {
-            this.changeMenuPosition(action.replace("changeMenuPosition_", ""));
+        } else if (actionName.startsWith("changeMenuPosition_")) {
+            this.changeMenuPosition(actionName.replace("changeMenuPosition_", ""));
+        } else if (actionName.startsWith("delayed")) {
+            if (!("actionName" in actionDetail)) {
+                actionDetail.actionName = actionName;  
+            }
+            this.delayedAction(actionDetail);
         } else {
-            alert(`Unknown OSM Menu Item Clicked: ${action}`);
+            alert(`Unknown OSM Menu Item Clicked: ${actionName}`);
         }
 
         this.toggleMenu(true);
+    },
+
+    delayedAction: function (timer) {    
+        // Restart the timer
+        if (timer.actionName in this.actionTimers) {
+            clearTimeout(this.actionTimers[timer.actionName]);
+            delete this.actionTimers[timer.actionName];
+        }
+        if (!timer.abort) {
+            this.actionTimers[timer.actionName] = setTimeout(() => { this.doMenuAction(timer.action); }, timer.delay);
+        }
     },
 
     handleModuleAction: function(action) {
