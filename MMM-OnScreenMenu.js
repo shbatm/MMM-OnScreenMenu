@@ -47,7 +47,7 @@ Module.register("MMM-OnScreenMenu", {
 
         this.sendSocketNotification("CONFIG", this.config);
 
-        this.kbInstance = (["127.0.0.1", "localhost"].indexOf(
+        this.kbInstance = (["localhost", "127.0.0.1", "::1", "::ffff:127.0.0.1", undefined, "0.0.0.0"].indexOf(
             window.location.hostname) > -1) ? "SERVER" : "LOCAL";
         Object.keys(this.config.menuItems).forEach(k => {
             if ("source" in this.config.menuItems[k] &&
