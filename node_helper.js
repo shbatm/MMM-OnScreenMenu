@@ -37,7 +37,6 @@ module.exports = NodeHelper.create({
                         }
                         self.checkForExecError(error, stdout, stderr);
                     });
-                exec("tvservice --preferred && sudo chvt 6 && sudo chvt 7", opts, (error, stdout, stderr) => { self.checkForExecError(error, stdout, stderr); });
                 break;
             case "monitorOff":
                 exec("tvservice -o", opts, (error, stdout, stderr) => { self.checkForExecError(error, stdout, stderr); });
