@@ -29,6 +29,14 @@ module.exports = NodeHelper.create({
 
         switch (payload) {
             case "monitorOn":
+                screenStatus = exec("tvservice --status", opts,
+                    function(error, stdout, stderr) {
+                        if (stdout.indexOf("TV is off") !== -1) {
+                            // Screen is OFF, turn it ON
+                            exec("tvservice --preferred && sudo chvt 6 && sudo chvt 7", opts, (error, stdout, stderr) => { self.checkForExecError(error, stdout, stderr); });
+                        }
+                        self.checkForExecError(error, stdout, stderr);
+                    });
                 exec("tvservice --preferred && sudo chvt 6 && sudo chvt 7", opts, (error, stdout, stderr) => { self.checkForExecError(error, stdout, stderr); });
                 break;
             case "monitorOff":
