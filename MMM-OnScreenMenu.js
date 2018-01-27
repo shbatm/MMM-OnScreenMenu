@@ -193,7 +193,7 @@ Module.register("MMM-OnScreenMenu", {
 
         console.log(`OSM Menu Item Clicked: ${actionName}\n${JSON.stringify(actionDetail)}`);
 
-        var nodeActions = ["monitorOn", "monitorOff", "monitorToggle", "restart", "reboot", "shutdown"];
+        var nodeActions = ["monitorOn", "monitorOff", "monitorToggle", "restart", "reboot", "shutdown", "stop"];
 
         // Module Actions
         if (actionName.startsWith("module")) {

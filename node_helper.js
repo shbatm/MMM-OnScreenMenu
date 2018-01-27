@@ -62,6 +62,14 @@ module.exports = NodeHelper.create({
                     self.checkForExecError(error, stdout, stderr);
                 });
                 break;
+            case "stop" :
+                /* TODO: Expand this to use the pm2 node module */
+                exec("pm2 stop mm", opts, (error, stdout, stderr) => {
+                    console.log("Stopping MagicMirror via pm2...");
+                    self.sendSocketNotification("STOP");
+                    self.checkForExecError(error, stdout, stderr);
+                });
+                break;
             case "shutdown":
                 exec("sudo shutdown -h now", opts, (error, stdout, stderr) => { self.checkForExecError(error, stdout, stderr); });
                 break;
@@ -107,5 +115,37 @@ module.exports = NodeHelper.create({
             return 1;
         }
         return 0;
+    },
+
+    stopMM: function() {
+        var pm2 = require('pm2');
+
+        pm2.connect((err) => {
+            if (err) {
+                console.error(err);
+            }
+
+            console.log("Stopping PM2 process: mm");
+            pm2.stop("mm", function(err, apps) {
+                pm2.disconnect();
+                if (err) { console.log(err); }
+            });
+        });
+    },
+
+    restartMM: function() {
+        var pm2 = require('pm2');
+
+        pm2.connect((err) => {
+            if (err) {
+                console.error(err);
+            }
+
+            console.log("Restarting PM2 process: mm");
+            pm2.restart("mm", function(err, apps) {
+                pm2.disconnect();
+                if (err) { console.log(err); }
+            });
+        });
     },
 });

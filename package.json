@@ -1,6 +1,6 @@
 {
   "name": "MMM-OnScreenMenu",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Module to provide a simple on-screen menu for controlling the mirror",
   "main": "MMM-OnScreenMenu.js",
   "repository": {
@@ -21,6 +21,7 @@
   "homepage": "https://github.com/shbatm/MMM-OnScreenMenu#readme",
   "dependencies": {
     "child_process": "^1.0.2",
-    "url": "^0.11.0"
+    "url": "^0.11.0",
+    "pm2": "^2.6.1"
   }
 }

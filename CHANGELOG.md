@@ -1,3 +1,8 @@
+## [0.1.2] - Added STOP option to stop the MM PM2 Process
+
+* Added the ability to add a "STOP" menu item to exit the MM process via PM2.
+* Added dependency on PM2 NodeJS module for "native" control over the MM PM2 process.
+
 ## [0.1.1] - Added delayed menu items
 
 * Added the ability to call menu items after a delay either via dedicated menu item for the delayed action or via notification from another module.

@@ -104,6 +104,7 @@ menuItems: {
 + System Control:
     * Refresh the browser page - `refresh`
     * Reload the MM² script (if using `pm2`) - `restart`
+    * Stop the MM² script (if using `pm2`) - `stop`
     * Reboot the server - `reboot`
     * Shutdown the server - `shutdown`
     * *Default commands are for Debian Linux (RaspPi Jessie). Customize `reboot`, `shutdown`, `restart` commands as needed in `node_helper.js`*
