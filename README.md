@@ -9,7 +9,7 @@ View the live demo/mockup here: https://codepen.io/shbatm/pen/OggMbr/
 Basic Functions:
 
 1. Control the power to the screen (On/Off/Toggle).
-2. Manage the Mirror (Shutdown/Reboot/Restart MM²/Refresh Window).
+2. Manage the Mirror (Shutdown/Reboot/Restart MM², Refresh/Minimize Window, Toggle Fullscreen mode, Open DevTools).
 3. Module Visibility (Show/Hide/Toggle).
 4. Send Notifications to Other Modules:
     * Switch Profiles in [MMM-ProfileSwitcher](https://github.com/tosti007/MMM-ProfileSwitcher)
@@ -67,7 +67,7 @@ var config = {
 | `enableKeyboard` | *Optional* - Enable basic keyboard control.<br>Menu can be controlled with the `ContextMenu` key (usually next to `Right-Alt`), Arrow Up/Down, and Enter.<br>*Default:* `true`<br><br>*To customize keys:* manually edit the `setupMousetrap` function in `MMM-OnScreenMenu.js`.
 | `enableKeyBindings` | *Optional* - Enable integration with [MMM-KeyBindings](https://github.com/shbatm/MMM-KeyBindings) for bluetooth remote and better keyboard control.  See [KeyBindings Config](#keybindings-config) below.
 | `menuItems` | See [Menu Items](#menu-items) below.
-
+| `pm2ProcessName` | The pm2 Process Name to control using `STOP` and `RESTART` menu items. <br>*Default:* `"mm"`
 
 ### Menu Items <a name="menu-items"></a>
 
@@ -103,10 +103,14 @@ menuItems: {
     * Toggle Screen Power - `monitorToggle`
 + System Control:
     * Refresh the browser page - `refresh`
+    * Minimize the browser window (if using `electron`) - `minimize`
+    * Toggle Fullscreen Mode (if using `electron`) - `toggleFullscreen`
+    * Open DevTools window (if using `electron`) - `openDevTools`
     * Reload the MM² script (if using `pm2`) - `restart`
+    * Stop the MM² script (if using `pm2`) - `stop`
     * Reboot the server - `reboot`
     * Shutdown the server - `shutdown`
-    * *Default commands are for Debian Linux (RaspPi Jessie). Customize `reboot`, `shutdown`, `restart` commands as needed in `node_helper.js`*
+    * *Default commands are for running MM² using PM2 & Electron on Debian Linux (Raspian); e.g. the default installation. You can customize `reboot`, `shutdown`, `restart` commands as needed in `node_helper.js`. and set the PM2 process name using the `pm2ProcessName` config option (Default: "mm")*
 + Module Control:
     * Hide a module - `moduleHideX` 
     * Show a module - `moduleShowX`

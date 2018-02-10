@@ -26,10 +26,18 @@ module.exports = NodeHelper.create({
         var self = this;
         var opts = { timeout: 8000 };
         var screenStatus;
+        var win;
 
         switch (payload) {
             case "monitorOn":
-                exec("tvservice --preferred && sudo chvt 6 && sudo chvt 7", opts, (error, stdout, stderr) => { self.checkForExecError(error, stdout, stderr); });
+                screenStatus = exec("tvservice --status", opts,
+                    function(error, stdout, stderr) {
+                        if (stdout.indexOf("TV is off") !== -1) {
+                            // Screen is OFF, turn it ON
+                            exec("tvservice --preferred && sudo chvt 6 && sudo chvt 7", opts, (error, stdout, stderr) => { self.checkForExecError(error, stdout, stderr); });
+                        }
+                        self.checkForExecError(error, stdout, stderr);
+                    });
                 break;
             case "monitorOff":
                 exec("tvservice -o", opts, (error, stdout, stderr) => { self.checkForExecError(error, stdout, stderr); });
@@ -48,18 +56,36 @@ module.exports = NodeHelper.create({
                     });
                 break;
             case "restart":
-                /* TODO: Expand this to use the pm2 node module */
+                this.restartMM();
+                self.sendSocketNotification("RESTART");
+                /* Old Method Below:
                 exec("pm2 restart mm", opts, (error, stdout, stderr) => {
                     console.log("Restarting MagicMirror via pm2...");
                     self.sendSocketNotification("RESTART");
                     self.checkForExecError(error, stdout, stderr);
-                });
+                }); */
+                break;
+            case "stop" :
+                this.stopMM();
+                self.sendSocketNotification("STOP");
                 break;
             case "shutdown":
                 exec("sudo shutdown -h now", opts, (error, stdout, stderr) => { self.checkForExecError(error, stdout, stderr); });
                 break;
             case "reboot":
                 exec("sudo shutdown -r now", opts, (error, stdout, stderr) => { self.checkForExecError(error, stdout, stderr); });
+                break;
+            case "minimize":
+                win = require("electron").BrowserWindow.getFocusedWindow();
+                win.minimize();
+                break;
+            case "toggleFullscreen":
+                win = require("electron").BrowserWindow.getFocusedWindow();
+                win.setFullScreen(!win.isFullScreen());
+                break;
+            case "openDevTools":
+                win = require("electron").BrowserWindow.getFocusedWindow();
+                win.webContents.openDevTools();
                 break;
             default:
                 // Should never get here, but OK:
@@ -100,5 +126,37 @@ module.exports = NodeHelper.create({
             return 1;
         }
         return 0;
+    },
+
+    stopMM: function() {
+        var pm2 = require('pm2');
+
+        pm2.connect((err) => {
+            if (err) {
+                console.error(err);
+            }
+
+            console.log("Stopping PM2 process: " + this.config.pm2ProcessName);
+            pm2.stop(this.config.pm2ProcessName, function(err, apps) {
+                pm2.disconnect();
+                if (err) { console.log(err); }
+            });
+        });
+    },
+
+    restartMM: function() {
+        var pm2 = require('pm2');
+
+        pm2.connect((err) => {
+            if (err) {
+                console.error(err);
+            }
+
+            console.log("Restarting PM2 process: " + this.config.pm2ProcessName);
+            pm2.restart(this.config.pm2ProcessName, function(err, apps) {
+                pm2.disconnect();
+                if (err) { console.log(err); }
+            });
+        });
     },
 });

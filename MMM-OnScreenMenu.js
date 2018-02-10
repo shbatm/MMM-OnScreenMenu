@@ -31,7 +31,8 @@ Module.register("MMM-OnScreenMenu", {
             Menu: "Menu"
         },
         kbMultiInstance: true,
-        keyBindingsTakeFocus: "Menu" // Can also be object: { KeyName:"Menu", KeyState:"KEY_LONGPRESSED" }
+        keyBindingsTakeFocus: "Menu", // Can also be object: { KeyName:"Menu", KeyState:"KEY_LONGPRESSED" }
+        pm2ProcessName: "mm"
     },
 
     requiresVersion: "2.1.0", // Required version of MagicMirror
@@ -193,7 +194,7 @@ Module.register("MMM-OnScreenMenu", {
 
         console.log(`OSM Menu Item Clicked: ${actionName}\n${JSON.stringify(actionDetail)}`);
 
-        var nodeActions = ["monitorOn", "monitorOff", "monitorToggle", "restart", "reboot", "shutdown"];
+        var nodeActions = ["monitorOn", "monitorOff", "monitorToggle", "restart", "reboot", "shutdown", "stop", "minimize", "toggleFullscreen", "openDevTools"];
 
         // Module Actions
         if (actionName.startsWith("module")) {
