@@ -1,3 +1,10 @@
+## [0.1.3] - Added MINIMIZE, FULLSCREEN and DEVTOOLS options
+
+* Added "minimize" menu option to minimize the MM window if using electron
+* Added "toggleFullscreen" menu option to toggle full screen mode
+* Added "openDevTools" menu option to open the DevTools window.
+* Changed method for restarting or stopping the PM2 instance from `exec` to use the PM2 NodeJS module.  Note: you must run `npm install` on the module directory to update.
+
 ## [0.1.2] - Added STOP option to stop the MM PM2 Process
 
 * Added the ability to add a "STOP" menu item to exit the MM process via PM2.

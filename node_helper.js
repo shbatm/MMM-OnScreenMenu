@@ -26,6 +26,7 @@ module.exports = NodeHelper.create({
         var self = this;
         var opts = { timeout: 8000 };
         var screenStatus;
+        var win;
 
         switch (payload) {
             case "monitorOn":
@@ -55,26 +56,36 @@ module.exports = NodeHelper.create({
                     });
                 break;
             case "restart":
-                /* TODO: Expand this to use the pm2 node module */
+                this.restartMM();
+                self.sendSocketNotification("RESTART");
+                /* Old Method Below:
                 exec("pm2 restart mm", opts, (error, stdout, stderr) => {
                     console.log("Restarting MagicMirror via pm2...");
                     self.sendSocketNotification("RESTART");
                     self.checkForExecError(error, stdout, stderr);
-                });
+                }); */
                 break;
             case "stop" :
-                /* TODO: Expand this to use the pm2 node module */
-                exec("pm2 stop mm", opts, (error, stdout, stderr) => {
-                    console.log("Stopping MagicMirror via pm2...");
-                    self.sendSocketNotification("STOP");
-                    self.checkForExecError(error, stdout, stderr);
-                });
+                this.stopMM();
+                self.sendSocketNotification("STOP");
                 break;
             case "shutdown":
                 exec("sudo shutdown -h now", opts, (error, stdout, stderr) => { self.checkForExecError(error, stdout, stderr); });
                 break;
             case "reboot":
                 exec("sudo shutdown -r now", opts, (error, stdout, stderr) => { self.checkForExecError(error, stdout, stderr); });
+                break;
+            case "minimize":
+                win = require("electron").BrowserWindow.getFocusedWindow();
+                win.minimize();
+                break;
+            case "toggleFullscreen":
+                win = require("electron").BrowserWindow.getFocusedWindow();
+                win.setFullScreen(!win.isFullScreen());
+                break;
+            case "openDevTools":
+                win = require("electron").BrowserWindow.getFocusedWindow();
+                win.webContents.openDevTools();
                 break;
             default:
                 // Should never get here, but OK:
@@ -125,8 +136,8 @@ module.exports = NodeHelper.create({
                 console.error(err);
             }
 
-            console.log("Stopping PM2 process: mm");
-            pm2.stop("mm", function(err, apps) {
+            console.log("Stopping PM2 process: " + this.config.pm2ProcessName);
+            pm2.stop(this.config.pm2ProcessName, function(err, apps) {
                 pm2.disconnect();
                 if (err) { console.log(err); }
             });
@@ -141,8 +152,8 @@ module.exports = NodeHelper.create({
                 console.error(err);
             }
 
-            console.log("Restarting PM2 process: mm");
-            pm2.restart("mm", function(err, apps) {
+            console.log("Restarting PM2 process: " + this.config.pm2ProcessName);
+            pm2.restart(this.config.pm2ProcessName, function(err, apps) {
                 pm2.disconnect();
                 if (err) { console.log(err); }
             });
