@@ -64,7 +64,6 @@ var config = {
 |-----------------------|-----------
 | `menuName` | *Optional* - Set the name of the menu. Only needs to be changed if using multiple instances of the module.<br>*Default:* `"MAIN"`.
 | `touchMode` | *Optional* - Enable Touch Mode for the menu.<br>When enabled, the menu button will always be visible and all tooltips will be shown when the menu is open.<br>When disabled, the menu will only appear when hovered over, clicked, or opened with a menu key.<br>*Default:* `true`
-| `autoCloseTimeout` | *Optional* - Auto close the menu after X number of microseconds (ms). *Default:* 0 (disabled)
 | `enableKeyboard` | *Optional* - Enable basic keyboard control.<br>Menu can be controlled with the `ContextMenu` key (usually next to `Right-Alt`), Arrow Up/Down, and Enter.<br>*Default:* `true`<br><br>*To customize keys:* manually edit the `setupMousetrap` function in `MMM-OnScreenMenu.js`.
 | `enableKeyBindings` | *Optional* - Enable integration with [MMM-KeyBindings](https://github.com/shbatm/MMM-KeyBindings) for bluetooth remote and better keyboard control.  See [KeyBindings Config](#keybindings-config) below.
 | `menuItems` | See [Menu Items](#menu-items) below.
@@ -118,10 +117,13 @@ menuItems: {
     * Toggle module visibility - `moduleToggleX`
     * *`X` is a unique number for each item, e.g. `moduleHide1` for the first hide module item*
     * *Add module's name to the menu item definition (see Menu Item Configurations above)*
+    * *If you have multiple instances of a module, add an instance name to both that module's config and the menu item (see third example below)*
     * Examples:
         ```js
         moduleHide1: { title: "Hide Clock", icon: "minus-square", name: "clock" },
         moduleShow1: { title: "Show Clock", icon: "plus-square", name: "clock" },
+        moduleToggle1: { title: "Toggle iFrame", icon: "info-circle", name: "MMM-iFrame", instance: "Frame1"}
+           # For example above, in MMM-iFrame-s config section, you also need to add `instance: "Frame1"`
         ```
 + Notifications:
     * Send a Module Notification to another module - `notifyX`

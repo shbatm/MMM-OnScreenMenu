@@ -1,3 +1,5 @@
+## [0.1.5] - Added "instance" option for toggling menus per #11
+
 ## [0.1.4] - Added autoCloseTimeout option as requested in #7
 
 * Added a autoCloseTimeout option to the config options. Set to something other than 0 to automatically close the menu after X ms.

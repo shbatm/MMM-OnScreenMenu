@@ -19,7 +19,6 @@ Module.register("MMM-OnScreenMenu", {
             shutdown: { title: "Shutdown", icon: "power-off", source: "ALL" },
         },
         enableKeyboard: true,
-        autoCloseTimeout: 0,
 
         // MMM-KeyBindings Settings
         enableKeyBindings: false,
@@ -171,9 +170,6 @@ Module.register("MMM-OnScreenMenu", {
             menu.classList.add("openMenu");
             this.menuOpen = true;
             this.manualOpen = true;
-            if (this.config.autoCloseTimeout) {
-                setTimeout(() => { this.toggleMenu(true); }, this.config.autoCloseTimeout);
-            }
             return;
         }
     },
@@ -239,7 +235,11 @@ Module.register("MMM-OnScreenMenu", {
 
     handleModuleAction: function(action) {
         var modules = MM.getModules().exceptModule(this).filter((m) => {
-            return m.name === this.config.menuItems[action].name;
+            if ("instance" in this.config.menuItems[action]) {
+                return (m.name === this.config.menuItems[action].name && m.data.config.instance === this.config.menuItems[action].instance);
+            } else {
+                return m.name === this.config.menuItems[action].name;
+            }
         }, this);
 
         if (typeof modules !== "undefined") {
