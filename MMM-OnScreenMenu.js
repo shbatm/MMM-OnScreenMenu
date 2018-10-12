@@ -239,7 +239,11 @@ Module.register("MMM-OnScreenMenu", {
 
     handleModuleAction: function(action) {
         var modules = MM.getModules().exceptModule(this).filter((m) => {
-            return m.name === this.config.menuItems[action].name;
+            if ("instance" in this.config.menuItems[action]) {
+                return (m.name === this.config.menuItems[action].name && m.data.config.instance === this.config.menuItems[action].instance);
+            } else {
+                return m.name === this.config.menuItems[action].name;
+            }
         }, this);
 
         if (typeof modules !== "undefined") {

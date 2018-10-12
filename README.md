@@ -118,10 +118,13 @@ menuItems: {
     * Toggle module visibility - `moduleToggleX`
     * *`X` is a unique number for each item, e.g. `moduleHide1` for the first hide module item*
     * *Add module's name to the menu item definition (see Menu Item Configurations above)*
+    * *If you have multiple instances of a module, add an instance name to both that module's config and the menu item (see third example below)*
     * Examples:
         ```js
         moduleHide1: { title: "Hide Clock", icon: "minus-square", name: "clock" },
         moduleShow1: { title: "Show Clock", icon: "plus-square", name: "clock" },
+        moduleToggle1: { title: "Toggle iFrame", icon: "info-circle", name: "MMM-iFrame", instance: "Frame1"}
+           # For example above, in MMM-iFrame's config section, you also need to add `instance: "Frame1"`
         ```
 + Notifications:
     * Send a Module Notification to another module - `notifyX`
