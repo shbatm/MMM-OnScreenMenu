@@ -64,7 +64,6 @@ var config = {
 |-----------------------|-----------
 | `menuName` | *Optional* - Set the name of the menu. Only needs to be changed if using multiple instances of the module.<br>*Default:* `"MAIN"`.
 | `touchMode` | *Optional* - Enable Touch Mode for the menu.<br>When enabled, the menu button will always be visible and all tooltips will be shown when the menu is open.<br>When disabled, the menu will only appear when hovered over, clicked, or opened with a menu key.<br>*Default:* `true`
-| `autoCloseTimeout` | *Optional* - Auto close the menu after X number of microseconds (ms). *Default:* 0 (disabled)
 | `enableKeyboard` | *Optional* - Enable basic keyboard control.<br>Menu can be controlled with the `ContextMenu` key (usually next to `Right-Alt`), Arrow Up/Down, and Enter.<br>*Default:* `true`<br><br>*To customize keys:* manually edit the `setupMousetrap` function in `MMM-OnScreenMenu.js`.
 | `enableKeyBindings` | *Optional* - Enable integration with [MMM-KeyBindings](https://github.com/shbatm/MMM-KeyBindings) for bluetooth remote and better keyboard control.  See [KeyBindings Config](#keybindings-config) below.
 | `menuItems` | See [Menu Items](#menu-items) below.
