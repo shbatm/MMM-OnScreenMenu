@@ -123,7 +123,7 @@ menuItems: {
         moduleHide1: { title: "Hide Clock", icon: "minus-square", name: "clock" },
         moduleShow1: { title: "Show Clock", icon: "plus-square", name: "clock" },
         moduleToggle1: { title: "Toggle iFrame", icon: "info-circle", name: "MMM-iFrame", instance: "Frame1"}
-           # For example above, in MMM-iFrame-s config section, you also need to add `instance: "Frame1"`
+           # For example above, in MMM-iFrame's config section, you also need to add `instance: "Frame1"`
         ```
 + Notifications:
     * Send a Module Notification to another module - `notifyX`
