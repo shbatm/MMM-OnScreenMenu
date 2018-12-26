@@ -6,6 +6,10 @@
  * By shbatm
  * MIT Licensed.
  */
+ (function () {
+    // Establish the root object, `window` in the browser, or `global` on the server.
+    var global = this; 
+})();
 
 Module.register("MMM-OnScreenMenu", {
     defaults: {
@@ -37,6 +41,9 @@ Module.register("MMM-OnScreenMenu", {
 
     requiresVersion: "2.1.0", // Required version of MagicMirror
 
+    // Allow for control on muliple instances
+    instance: (global.location && ["localhost", "127.0.0.1", "::1", "::ffff:127.0.0.1", undefined, "0.0.0.0"].indexOf(global.location.hostname) > -1) ? "SERVER" : "LOCAL",
+
     hovering: false,
     manualOpen: false,
     menuOpen: false,
@@ -46,13 +53,9 @@ Module.register("MMM-OnScreenMenu", {
     start: function() {
         console.log(this.name + " has started...");
 
-        this.sendSocketNotification("CONFIG", this.config);
-
-        this.kbInstance = (["localhost", "127.0.0.1", "::1", "::ffff:127.0.0.1", undefined, "0.0.0.0"].indexOf(
-            window.location.hostname) > -1) ? "SERVER" : "LOCAL";
         Object.keys(this.config.menuItems).forEach(k => {
             if ("source" in this.config.menuItems[k] &&
-                (this.config.menuItems[k].source !== this.kbInstance &&
+                (this.config.menuItems[k].source !== this.instance &&
                     this.config.menuItems[k].source !== "ALL")) {
                 delete this.config.menuItems[k];
             }
@@ -87,17 +90,6 @@ Module.register("MMM-OnScreenMenu", {
 
     getDom: function() {
         return this.createMenu();
-    },
-
-    // socketNotificationReceived from helper
-    socketNotificationReceived: function(notification, payload) {
-        // console.log("Working notification system. Notification:", notification, "payload: ", payload);
-        if (notification === "RESTART") {
-            setTimeout(function() {
-                document.location.reload();
-                console.log('Delayed REFRESH');
-            }, 45000);
-        }
     },
 
     notificationReceived: function(notification, payload, sender) {
@@ -203,7 +195,7 @@ Module.register("MMM-OnScreenMenu", {
             this.sendNotification(actionDetail.notification,
                 actionDetail.payload);
         } else if (nodeActions.indexOf(actionName) !== -1) {
-            this.sendSocketNotification("PROCESS_ACTION", actionName);
+            this.sendNotification("REMOTE_ACTION", { action: actionName.toUpperCase() });
         } else if (actionName === "refresh") {
             window.location.reload(true);
         } else if (actionName === "toggleTouchMode") {
@@ -354,25 +346,6 @@ Module.register("MMM-OnScreenMenu", {
 
         div.appendChild(nav);
         return div;
-
-        /* FLOATING ACTION BUTTON MENU HTML SHOULD LOOK LIKE THIS:
-          <div id="menu" class="bottom_right">
-          <nav id="menuContainer" class="container" onmouseenter="mouseenterCB()" onmouseout="mouseoutCB();"> 
-            <span class="buttons item" id="monitorOff" onclick="clicked('Turn Off Display')" tooltip="Turn Off Display">
-              <i class="fa fa-television" aria-hidden="true"></i></span>
-            <span class="buttons item" id="restart" onclick="clicked('Restart MagicMirror')" tooltip="Restart MagicMirror">
-              <i class="fa fa-refresh" aria-hidden="true"></i></span>
-            <span class="buttons item" id="reboot" onclick="clicked('Reboot')" tooltip="Reboot">
-              <i class="fa fa-spinner" aria-hidden="true"></i></span>
-            <span class="buttons item" id="shutdown" onclick="clicked('Shutdown')" tooltip="Shutdown">
-              <i class="fa fa-power-off" aria-hidden="true"></i></span>
-            <span onclick="toggleMenu()" class="buttons menu" tooltip="Close">
-              <i class="fa fa-bars closed" aria-hidden="true"></i>
-              <i class="fa fa-times opened" aria-hidden="true"></i>
-            </span>
-          </nav>
-          </div>
-        */
     },
 
     /* Function to change position of the menu. 
@@ -424,7 +397,7 @@ Module.register("MMM-OnScreenMenu", {
 
         // Validate Keypresses
         if (notification === "KEYPRESS" && this.currentKeyPressMode === this.config.keyBindingsMode) {
-            if (this.config.kbMultiInstance && payload.Sender !== this.kbInstance) {
+            if (this.config.kbMultiInstance && payload.Sender !== this.instance) {
                 return false; // Wrong Instance
             }
             if (!(payload.KeyName in this.reverseKBMap)) {
@@ -439,7 +412,7 @@ Module.register("MMM-OnScreenMenu", {
             if (this.currentKeyPressMode === this.config.keyBindingsMode) {
                 return false; // Already have focus.
             }
-            if (this.config.kbMultiInstance && payload.Sender !== this.kbInstance) {
+            if (this.config.kbMultiInstance && payload.Sender !== this.instance) {
                 return false; // Wrong Instance
             }
             if (typeof this.config.keyBindingsTakeFocus === "object") {
@@ -485,82 +458,4 @@ Module.register("MMM-OnScreenMenu", {
         this.sendNotification("KEYPRESS_MODE_CHANGED", "DEFAULT");
         this.currentKeyPressMode = "DEFAULT";
     },
-
-    /***** FULL SCREEN OVERLAY, NOT USED AT THIS TIME *****/
-    /*    createOverlay: function(brightness) {
-            var overlay = document.getElementById('osm-overlay');
-            if (!overlay) {
-                // if not existing, create overlay
-                var overlayNew = document.createElement("div");
-                overlayNew.id = "osm-overlay";
-                var parent = document.body;
-                parent.insertBefore(overlayNew, parent.firstChild);
-            }
-            overlay.style.className = "osm overlay";
-        },
-
-        removeOverlay: function() {
-            var overlay = document.getElementById('osm-overlay');
-            if (overlay) {
-                var parent = document.body;
-                parent.removeChild(overlay);
-            }
-        },*/
-
-    /***** FULL SCREEN MODAL MENU, NOT USED AT THIS TIME *****/
-    /*    createMenu: function() {
-            var self = this;
-
-            function makeOnClickHandler(a) {
-                return function () {
-                    self.doMenuAction(a);
-                };
-            }
-
-            var existingMenu = document.getElementById('osm-menu');
-            
-            if (!existingMenu) {
-                var wrapper = document.createElement("div");
-                wrapper.id = "osm-menu";
-                wrapper.className = "osm modal";
-
-                var ul = document.createElement("ul");
-                ul.id = "osm";
-                ul.className = "osm";
-
-                Object.keys(this.config.menuItems).foreach(k => {
-                    var li = document.createElement("li");
-                    li.innerHTML = `<span id=osm_${k}><i class="fa fa-${this.config.menuItems[k].icon} fa-fw" aria-hidden="true"></i>&nbsp; ${this.config.menuItems[k].title}</span>`;
-                    li.className = "osm";
-                    li.onclick = makeOnClickHandler(k);
-                    ul.appendChild(li);
-                });
-
-                wrapper.appendChild(ul);
-                var parent = document.body;
-                parent.insertBefore(wrapper, parent.firstChild);
-                existingMenu = wrapper;
-            }
-            existingMenu.style.visibility = "visible";
-        },
-
-        hideMenu: function() {
-            var menu = document.getElementById('osm-menu');
-            if (menu) {
-                var parent = document.body;
-                parent.removeChild(menu);
-                menu.style.visibility = "hidden";
-            }
-        },
-
-        toggleMenu: function(visible) {
-            if (visible) {
-                this.createOverlay();
-                this.createMenu();
-            } else {
-                this.removeOverlay();
-                this.hideMenu();
-            }
-        },*/
-
 });

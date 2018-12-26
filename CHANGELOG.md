@@ -1,3 +1,7 @@
+## [0.2.0] - Remove system commands in favor of MMM-Remote-Control
+
+* This update removes all system commands in favor of using MMM-Remote-Control as a back-end for handling the commands. The commands will still work in your menu, you will just be required to have MMM-Remote-Control installed to handle anything like Monitor or Server controls.
+
 ## [0.1.5] - Added "instance" option for toggling menus per #11
 
 ## [0.1.4] - Added autoCloseTimeout option as requested in #7

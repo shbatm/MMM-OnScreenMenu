@@ -31,9 +31,24 @@ The menu is designed to be controllable from multiple devices:
 
 ## Installation
 
-```shell
+### Prerequisites
+
+As of version 0.2.0, this module requires [MMM-Remote-Control] to perform any of the "back-end" functions like controlling the monitor or restarting your Mirror.
+
+### Quick install
+
+If you followed the default installation instructions for the [Magic Mirror²](https://github.com/MichMich/MagicMirror) project, you should be able to use the automatic installer.
+The following command will download the installer and execute it:
+```bash
+bash -c "$(curl -s https://raw.githubusercontent.com/shbatm/MMM-OnScreenMenu/develop/installer.sh)"
+```
+
+### Manual install
+
+- Clone this repository in your `modules` folder, and install dependencies:
+```bash
 cd ~/MagicMirror/modules
-git clone https://github.com/shbatm/MMM-OnScreenMenu
+git clone https://github.com/shbatm/MMM-OnScreenMenu.git
 cd MMM-OnScreenMenu/
 npm install
 ```
@@ -105,7 +120,7 @@ menuItems: {
     * Refresh the browser page - `refresh`
     * Minimize the browser window (if using `electron`) - `minimize`
     * Toggle Fullscreen Mode (if using `electron`) - `toggleFullscreen`
-    * Open DevTools window (if using `electron`) - `openDevTools`
+    * Open DevTools window (if using `electron`) - `devTools`
     * Reload the MM² script (if using `pm2`) - `restart`
     * Stop the MM² script (if using `pm2`) - `stop`
     * Reboot the server - `reboot`
