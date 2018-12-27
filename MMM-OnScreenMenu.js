@@ -6,10 +6,9 @@
  * By shbatm
  * MIT Licensed.
  */
- (function () {
-    // Establish the root object, `window` in the browser, or `global` on the server.
-    var global = this; 
-})();
+
+// Establish the root object, `window` in the browser, or `global` on the server.
+var global = this;
 
 Module.register("MMM-OnScreenMenu", {
     defaults: {
@@ -25,18 +24,25 @@ Module.register("MMM-OnScreenMenu", {
         enableKeyboard: true,
 
         // MMM-KeyBindings Settings
-        enableKeyBindings: false,
-        keyBindingsMode: "OSM",
         keyBindings: {
+            enabled: true
+        },
+
+        pm2ProcessName: "mm"
+    },
+
+    keyBindings: {
+        enabled: false,
+        mode: "OSM",
+        map: {
             Up: "ArrowUp",
             Down: "ArrowDown",
             Select: "Enter",
             Close: "Return",
             Menu: "Menu"
         },
-        kbMultiInstance: true,
-        keyBindingsTakeFocus: "Menu", // Can also be object: { KeyName:"Menu", KeyState:"KEY_LONGPRESSED" }
-        pm2ProcessName: "mm"
+        multiInstance: true,
+        takeFocus: "Menu"
     },
 
     requiresVersion: "2.1.0", // Required version of MagicMirror
@@ -63,8 +69,6 @@ Module.register("MMM-OnScreenMenu", {
 
         if (this.config.enableKeyboard) {
             this.setupMousetrap();
-        } else if (this.config.enableKeyBindings) {
-            this.setupKeyBindings();
         }
     },
 
@@ -72,8 +76,8 @@ Module.register("MMM-OnScreenMenu", {
         Mousetrap.bind('up', () => this.selectMenuItem(-1));
         Mousetrap.bind('down', () => this.selectMenuItem());
         Mousetrap.bind('enter', () => this.doMenuActionCB());
-        Mousetrap.addKeycodes({ 93: 'menu' });
-        Mousetrap.bind('menu', (e) => {
+        Mousetrap.addKeycodes({ 93: 'Menu' });
+        Mousetrap.bind('Menu', (e) => {
             this.toggleMenu();
             e.preventDefault();
             return false;
@@ -93,15 +97,26 @@ Module.register("MMM-OnScreenMenu", {
     },
 
     notificationReceived: function(notification, payload, sender) {
-        if (this.config.enableKeyBindings) {
-            if (this.validateKeyPress(notification, payload)) {
-                return;
+        if (notification === "DOM_OBJECTS_CREATED") {
+            // Register Key Handler
+            if (this.config.keyBindings.enabled &&
+                MM.getModules().filter(kb => kb.name === "MMM-KeyBindings").length > 0) {
+                this.keyBindings = Object.assign({}, this.keyBindings, this.config.keyBindings);
+                KeyHandler.register(this.name, {
+                    sendNotification: (n, p) => { this.sendNotification(n,p); },
+                    validKeyPress: (kp) => { this.validKeyPress(kp); },
+                    onFocus: () => {
+                        if (!this.menuOpen) { this.toggleMenu(); }
+                    },
+                    onFocusReleased: ()=> {
+                        if (this.menuOpen) { this.toggleMenu(); }
+                    }
+                });
+                this.keyHandler = KeyHandler.create(this.name, this.keyBindings);
             }
         }
+        if (this.keyHandler && this.keyHandler.validate(notification, payload)) { return; }
 
-        if (notification === "DOM_OBJECTS_CREATED") {
-            // do nothing
-        }
         if (notification === "ALL_MODULES_STARTED") {
             // do nothing
         }
@@ -154,8 +169,8 @@ Module.register("MMM-OnScreenMenu", {
             menu.classList.remove("openMenu");
             this.manualOpen = false;
             this.menuOpen = this.hovering;
-            if (this.config.enableKeyBindings && !this.menuOpen) {
-                this.keyPressReleaseFocus();
+            if (this.config.keyBindings.enabled && !this.menuOpen) {
+                this.keyHandler.releaseFocus();
             }
             return;
         } else {
@@ -204,7 +219,7 @@ Module.register("MMM-OnScreenMenu", {
             this.changeMenuPosition(actionName.replace("changeMenuPosition_", ""));
         } else if (actionName.startsWith("delayed")) {
             if (!("actionName" in actionDetail)) {
-                actionDetail.actionName = actionName;  
+                actionDetail.actionName = actionName;
             }
             this.delayedAction(actionDetail);
         } else {
@@ -214,7 +229,7 @@ Module.register("MMM-OnScreenMenu", {
         this.toggleMenu(true);
     },
 
-    delayedAction: function (timer) {    
+    delayedAction: function(timer) {
         // Restart the timer
         if (timer.actionName in this.actionTimers) {
             clearTimeout(this.actionTimers[timer.actionName]);
@@ -278,18 +293,18 @@ Module.register("MMM-OnScreenMenu", {
     mouseenterCB: function() {
         this.hovering = true;
         this.menuOpen = true;
-        if (this.config.enableKeyBindings &&
-            this.currentKeyPressMode !== this.config.keyBindingsMode) {
-            this.keyPressFocusReceived();
+        if (this.config.keyBindings.enabled &&
+            this.keyHandler.currentMode !== this.config.keyBindings.mode) {
+
         }
     },
 
     mouseoutCB: function() {
         this.hovering = false;
         this.menuOpen = this.manualOpen;
-        if (this.config.enableKeyBindings && !this.menuOpen &&
+        if (this.config.keyBindings.enabled && !this.menuOpen &&
             this.currentKeyPressMode === this.config.keyBindingsMode) {
-            this.keyPressReleaseFocus();
+            this.keyHandler.releaseFocus();
         }
     },
 
@@ -372,90 +387,18 @@ Module.register("MMM-OnScreenMenu", {
         menu.classList.toggle("touchMode");
     },
 
-    setupKeyBindings: function() {
-        this.currentKeyPressMode = "DEFAULT";
-        if (typeof this.config.kbMultiInstance === undefined) {
-            this.config.kbMultiInstance = true;
-        }
-        this.reverseKBMap = {};
-        for (var eKey in this.config.keyBindings) {
-            if (this.config.keyBindings.hasOwnProperty(eKey)) {
-                this.reverseKBMap[this.config.keyBindings[eKey]] = eKey;
-            }
-        }
-    },
-
-    validateKeyPress: function(notification, payload) {
-        // Handle KEYPRESS mode change events from the MMM-KeyBindings Module
-        if (notification === "KEYPRESS_MODE_CHANGED") {
-            this.currentKeyPressMode = payload;
-            return true;
-        }
-
-        // Uncomment line below for diagnostics & to confirm keypresses are being recieved
-        // if (notification === "KEYPRESS") { console.log(payload, this.currentKeyPressMode); }
-
-        // Validate Keypresses
-        if (notification === "KEYPRESS" && this.currentKeyPressMode === this.config.keyBindingsMode) {
-            if (this.config.kbMultiInstance && payload.Sender !== this.instance) {
-                return false; // Wrong Instance
-            }
-            if (!(payload.KeyName in this.reverseKBMap)) {
-                return false; // Not a key we listen for
-            }
-            this.validKeyPress(payload);
-            return true;
-        }
-
-        // Test for focus key pressed and need to take focus:
-        if (notification === "KEYPRESS" && ("keyBindingsTakeFocus" in this.config)) {
-            if (this.currentKeyPressMode === this.config.keyBindingsMode) {
-                return false; // Already have focus.
-            }
-            if (this.config.kbMultiInstance && payload.Sender !== this.instance) {
-                return false; // Wrong Instance
-            }
-            if (typeof this.config.keyBindingsTakeFocus === "object") {
-                if (this.config.keyBindingsTakeFocus.KeyPress !== payload.KeyPress ||
-                    this.config.keyBindingsTakeFocus.KeyState !== payload.KeyState) {
-                    return false; // Wrong KeyName/KeyPress Combo
-                }
-            } else if (typeof this.config.keyBindingsTakeFocus === "string" &&
-                payload.KeyName !== this.config.keyBindingsTakeFocus) {
-                return false; // Wrong Key;
-            }
-
-            this.keyPressFocusReceived();
-            return true;
-        }
-
-        return false;
-    },
-
     validKeyPress: function(kp) {
-        if (kp.KeyName === this.config.keyBindings.Up) {
+        if (kp.keyName === this.keyHandler.config.map.Up) {
             this.selectMenuItem(-1);
-        } else if (kp.KeyName === this.config.keyBindings.Down) {
+        } else if (kp.keyName === this.keyHandler.config.map.Down) {
             this.selectMenuItem();
-        } else if (kp.KeyName === this.config.keyBindings.Select) {
+        } else if (kp.keyName === this.keyHandler.config.map.Select) {
             this.doMenuActionCB();
-        } else if (kp.KeyName === this.config.keyBindings.Close) {
+        } else if (kp.keyName === this.keyHandler.config.map.Close) {
             this.toggleMenu(true);
-        } else if (kp.KeyName === this.config.keyBindings.Menu) {
+        } else if (kp.keyName === this.keyHandler.config.map.Menu) {
             this.toggleMenu();
         }
     },
 
-    keyPressFocusReceived: function(kp) {
-        // console.log(this.name + "HAS FOCUS!");
-        this.sendNotification("KEYPRESS_MODE_CHANGED", this.config.keyBindingsMode);
-        this.currentKeyPressMode = this.config.keyBindingsMode;
-        if (!this.menuOpen) { this.toggleMenu(); }
-    },
-
-    keyPressReleaseFocus: function() {
-        // console.log(this.name + "HAS RELEASED FOCUS!");
-        this.sendNotification("KEYPRESS_MODE_CHANGED", "DEFAULT");
-        this.currentKeyPressMode = "DEFAULT";
-    },
 });
