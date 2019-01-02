@@ -27,8 +27,6 @@ Module.register("MMM-OnScreenMenu", {
         keyBindings: {
             enabled: true
         },
-
-        pm2ProcessName: "mm"
     },
 
     keyBindings: {
@@ -85,12 +83,14 @@ Module.register("MMM-OnScreenMenu", {
     },
 
     getScripts: function() {
-        return [
-            this.file('js/mousetrap.min.js'),
+        let scripts = [
             this.file('js/jquery-3.2.1.min.js'),
             this.file('js/popper.min.js'),
             this.file('js/bootstrap.min.js')
         ];
+        if (this.config.enableKeyboard) { scripts.push(this.file('js/mousetrap.min.js')); }
+
+        return scripts;
     },
 
     getStyles: function() {
@@ -119,6 +119,11 @@ Module.register("MMM-OnScreenMenu", {
                 });
                 this.keyHandler = KeyHandler.create(this.name, this.keyBindings);
             }
+            this.sendNotification("REGISTER_API", {
+                module: "MMM-OnScreenMenu",
+                path: "onscreenmenu",
+                actions: {}
+            });
         }
         if (this.keyHandler && this.keyHandler.validate(notification, payload)) { return; }
 
@@ -326,14 +331,13 @@ Module.register("MMM-OnScreenMenu", {
             };
         }
 
-        var $div = $('div').attr("id", `osm${this.config.menuName}`)
+        var $div = $('<div />').attr("id", `osm${this.config.menuName}`)
             .addClass(this.data.position + ((this.config.touchMode) ? " touchMode" : ""));
 
-        var $nav = $('nav').attr("id", "menuContainer").addClass("osmContainer")
+        var $nav = $('<nav />').attr("id", "menuContainer").addClass("osmContainer")
             .on("mouseenter", () => this.mouseenterCB()).on("mouseout", () => this.mouseoutCB());
 
-        var $fab = $('span').addClass("osmButtons menu").attr("tooltip", "Close")
-            .on("click", () => this.toggleMenu())
+        var $fab = $('<span />').addClass("osmButtons menu").attr("tooltip", "Close")
             .html(`<i class="fa fa-bars closed" aria-hidden="true"></i>
                    <i class="fa fa-times opened" aria-hidden="true"></i>`);
 
@@ -341,17 +345,22 @@ Module.register("MMM-OnScreenMenu", {
             $nav.append($fab);
         }
 
-        Object.keys(this.config.menuItems).forEach(k => {
-            let $span = $('span').attr('id', `osm${this.config.menuName}_${k}`)
-                .html(`<i class="fa fa-${this.config.menuItems[k].icon}" aria-hidden="true"></i>`)
-                .addClass('osmButtons item').attr('tooltip', this.config.menuItems[k].title);
-            if (k === "remote") {
-                this.createMMMRCframe($span);
-            } else {
-                $span.on("click", makeOnClickHandler(k));
-            }
-            $nav.append($span);
-        });
+        if (this.config.useMMMRC) {
+            this.createMMMRCframe($fab);
+        } else {
+            $fab.on("click", () => this.toggleMenu());
+            Object.keys(this.config.menuItems).forEach(k => {
+                let $span = $('<span />').attr('id', `osm${this.config.menuName}_${k}`)
+                    .html(`<i class="fa fa-${this.config.menuItems[k].icon}" aria-hidden="true"></i>`)
+                    .addClass('osmButtons item').attr('tooltip', this.config.menuItems[k].title);
+                if (k === "remote") {
+                    this.createMMMRCframe($span);
+                } else {
+                    $span.on("click", makeOnClickHandler(k));
+                }
+                $nav.append($span);
+            });
+        }
 
         if (this.data.position.startsWith("bottom")) {
             $nav.append($fab);
@@ -400,15 +409,10 @@ Module.register("MMM-OnScreenMenu", {
 
     createMMMRCframe: function($item) {
         $item.popover({
-            title: function() {
-                var template = `<span id="popover-title" class="white-text">Remote Control</span>
-                            <button type="button" class="close" id="btnClose" data-dismiss="modal" aria-label="Close"><span aria-hidden="true" class="white-text">&times;</span></button>`;
-                return template;
-            },
             html: true,
             placement: "auto",
             content: function() {
-                return '<iframe src="/remote.html" style="border:none; height: 400px; width: 200px"></iframe>';
+                return '<iframe src="/remote.html" style="border:none; height: 600px; width: 400px"></iframe>';
             }
         }).on('inserted.bs.popover', function(evt) {
             var $popup = $('#' + $(evt.target).attr('aria-describedby'));
@@ -416,6 +420,14 @@ Module.register("MMM-OnScreenMenu", {
             $popup.find('button').click(function(e) {
                 $popup.popover('hide');
                 if (this.id !== "btnClose") { that.handleControlEvent(evt.target, this.id); }
+            });
+        });
+        $(document).on('click', function(e) {
+            $('[data-toggle="popover"],[data-original-title]').each(function() {
+                if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
+                    (($(this).popover('hide').data('bs.popover') || {}).inState || {}).click = false; // fix for BS 3.3.6
+                }
+
             });
         });
     },

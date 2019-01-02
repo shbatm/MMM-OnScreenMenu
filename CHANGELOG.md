@@ -1,3 +1,9 @@
+## [0.2.1] - Allow use of MMM-Remote-Control as menu
+
+* Can use "remote" menu item to create a popup version of MMM-Remote-Control
+* Can specify "useMMMRC: true" in config to replace the menu entirely.
+* Send REGISTER_API notification to blank out actions in MMM-RC
+
 ## [0.2.0] - Remove system commands in favor of MMM-Remote-Control
 
 * This update removes all system commands in favor of using MMM-Remote-Control as a back-end for handling the commands. The commands will still work in your menu, you will just be required to have MMM-Remote-Control installed to handle anything like Monitor or Server controls.

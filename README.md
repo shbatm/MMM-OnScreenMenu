@@ -82,7 +82,7 @@ var config = {
 | `enableKeyboard` | *Optional* - Enable basic keyboard control.<br>Menu can be controlled with the `ContextMenu` key (usually next to `Right-Alt`), Arrow Up/Down, and Enter.<br>*Default:* `true`<br><br>*To customize keys:* manually edit the `setupMousetrap` function in `MMM-OnScreenMenu.js`.
 | `enableKeyBindings` | *Optional* - Enable integration with [MMM-KeyBindings](https://github.com/shbatm/MMM-KeyBindings) for bluetooth remote and better keyboard control.  See [KeyBindings Config](#keybindings-config) below.
 | `menuItems` | See [Menu Items](#menu-items) below.
-| `pm2ProcessName` | The pm2 Process Name to control using `STOP` and `RESTART` menu items. <br>*Default:* `"mm"`
+| `useMMMRC` | Replace the entire menu with MMM-Remote-Control<br>*Default:* `false`
 
 ### Menu Items <a name="menu-items"></a>
 
@@ -127,6 +127,7 @@ menuItems: {
     * Shutdown the server - `shutdown`
     * *Default commands are for running MM² using PM2 & Electron on Debian Linux (Raspian); e.g. the default installation. You can customize `reboot`, `shutdown`, `restart` commands as needed in `node_helper.js`. and set the PM2 process name using the `pm2ProcessName` config option (Default: "mm")*
 + Module Control:
+    * Open MMM-Remote-Control - `remote`
     * Hide a module - `moduleHideX` 
     * Show a module - `moduleShowX`
     * Toggle module visibility - `moduleToggleX`
