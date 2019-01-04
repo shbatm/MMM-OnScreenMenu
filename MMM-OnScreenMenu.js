@@ -179,7 +179,7 @@ Module.register("MMM-OnScreenMenu", {
             menu.classList.remove("openMenu");
             this.manualOpen = false;
             this.menuOpen = this.hovering;
-            if (this.config.keyBindings.enabled && !this.menuOpen) {
+            if (this.keyBindings.enabled && !this.menuOpen) {
                 this.keyHandler.releaseFocus();
             }
             return;
@@ -303,8 +303,8 @@ Module.register("MMM-OnScreenMenu", {
     mouseenterCB: function() {
         this.hovering = true;
         this.menuOpen = true;
-        if (this.config.keyBindings.enabled &&
-            this.keyHandler.currentMode !== this.config.keyBindings.mode) {
+        if (this.keyBindings.enabled &&
+            this.keyHandler.currentMode !== this.keyBindings.mode) {
 
         }
     },
@@ -312,8 +312,8 @@ Module.register("MMM-OnScreenMenu", {
     mouseoutCB: function() {
         this.hovering = false;
         this.menuOpen = this.manualOpen;
-        if (this.config.keyBindings.enabled && !this.menuOpen &&
-            this.currentKeyPressMode === this.config.keyBindingsMode) {
+        if (this.keyBindings.enabled && !this.menuOpen &&
+            this.currentKeyPressMode === this.keyBindings.mode) {
             this.keyHandler.releaseFocus();
         }
     },
