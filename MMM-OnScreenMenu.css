@@ -99,7 +99,6 @@
     opacity: 0.8;
 }
 
-.osmContainer:hover .osmButtons.menu,
 .openMenu .osmButtons.menu {
     opacity: 0.8;
     -webkit-transition-delay: 0ms;
@@ -127,8 +126,7 @@
     transition-delay: 0ms;
 }
 
-.openMenu .osmButtons.menu .closed,
-.osmContainer:hover .osmButtons.menu .closed {
+.openMenu .osmButtons.menu .closed {
     opacity: 0 !important;
     -webkit-transition: all .1s ease-out;
     transition: all .1s ease-out;
@@ -136,7 +134,6 @@
     transition-delay: 500ms;
 }
 
-.osmContainer:hover .osmButtons.menu .opened,
 .openMenu .osmButtons.menu .opened {
     opacity: 1 !important;
     -webkit-transition: all .25s ease-in;
@@ -176,7 +173,6 @@
     transition-delay: 500ms;
 }
 
-.osmContainer:hover .osmButtons.item,
 .openMenu .osmButtons.item {
     opacity: 0.8;
     -webkit-transform: none;
