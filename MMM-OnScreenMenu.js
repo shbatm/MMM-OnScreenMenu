@@ -307,7 +307,7 @@ Module.register("MMM-OnScreenMenu", {
         }
     },
 
-    mouseoutCB: function() {
+    mouseleaveCB: function() {
         this.setHovering(false);
         if (this.config.enableKeyBindings && !this.getMenuOpen() &&
             this.currentKeyPressMode === this.config.keyBindingsMode) {
@@ -339,7 +339,7 @@ Module.register("MMM-OnScreenMenu", {
         nav.id = "menuContainer";
         nav.className = "osmContainer";
         nav.onmouseenter = () => this.mouseenterCB();
-        nav.onmouseout = () => this.mouseoutCB();
+        nav.onmouseleave = () => this.mouseleaveCB();
 
         var fab = document.createElement("span");
         fab.className = "osmButtons menu";
@@ -371,7 +371,7 @@ Module.register("MMM-OnScreenMenu", {
 
         /* FLOATING ACTION BUTTON MENU HTML SHOULD LOOK LIKE THIS:
           <div id="menu" class="bottom_right">
-          <nav id="menuContainer" class="container" onmouseenter="mouseenterCB()" onmouseout="mouseoutCB();"> 
+          <nav id="menuContainer" class="container" onmouseenter="mouseenterCB()" onmouseleave="mouseleaveCB();"> 
             <span class="buttons item" id="monitorOff" onclick="clicked('Turn Off Display')" tooltip="Turn Off Display">
               <i class="fa fa-television" aria-hidden="true"></i></span>
             <span class="buttons item" id="restart" onclick="clicked('Restart MagicMirror')" tooltip="Restart MagicMirror">
