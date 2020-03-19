@@ -10,6 +10,7 @@
 Module.register("MMM-OnScreenMenu", {
     defaults: {
         touchMode: true,
+        openOnHover: true,
         menuName: "MAIN",
         menuItems: {
             monitorOff: { title: "Turn Off Monitor", icon: "television", source: "SERVER" },
@@ -49,7 +50,7 @@ Module.register("MMM-OnScreenMenu", {
         this._manualOpen = state;
         this.updateMenuState();
     },
-    getMenuOpen: function() { return this.getHovering() || this.getManualOpen(); },
+    getMenuOpen: function() { return (this.config.openOnHover && this.getHovering()) || this.getManualOpen(); },
     selectedMenuItem: '',
     actionTimers: {},
 
