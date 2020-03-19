@@ -37,9 +37,19 @@ Module.register("MMM-OnScreenMenu", {
 
     requiresVersion: "2.1.0", // Required version of MagicMirror
 
-    hovering: false,
-    manualOpen: false,
-    menuOpen: false,
+    _hovering: false,
+    _manualOpen: false,
+    getHovering: function() { return this._hovering; },
+    setHovering: function(state) {
+        this._hovering = state;
+        this.updateMenuState();
+    },
+    getManualOpen: function() { return this._manualOpen; },
+    setManualOpen: function(state) {
+        this._manualOpen = state;
+        this.updateMenuState();
+    },
+    getMenuOpen: function() { return this.getHovering() || this.getManualOpen(); },
     selectedMenuItem: '',
     actionTimers: {},
 
@@ -133,7 +143,7 @@ Module.register("MMM-OnScreenMenu", {
 
     /********** ON SCREEN MENU FUNCTIONS **********/
     clickByNumber: function(itemNumber) {
-        if (!this.menuOpen) {
+        if (!this.getMenuOpen()) {
             // Correct menu must be opened first
             return;
         }
@@ -155,22 +165,28 @@ Module.register("MMM-OnScreenMenu", {
     },
 
     toggleMenu: function(forceClose) {
-        var menu = document.getElementById("osm" + this.config.menuName);
-        // console.log(`Hovering: ${this.hovering}, Manual: ${this.manualOpen}, Open: ${this.menuOpen}, forceClose: ${forceClose}`);
-        if (forceClose || this.manualOpen) {
-            this.clearSelection();
-            menu.classList.remove("openMenu");
-            this.manualOpen = false;
-            this.menuOpen = this.hovering;
-            if (this.config.enableKeyBindings && !this.menuOpen) {
+        // console.log(`Hovering: ${this.getHovering()}, Manual: ${this.getManualOpen()}, Open: ${this.getMenuOpen()}, forceClose: ${forceClose}`);
+        if (forceClose || this.getManualOpen()) {
+            this.setManualOpen(false);
+            if (this.config.enableKeyBindings && !this.getMenuOpen()) {
                 this.keyPressReleaseFocus();
             }
             return;
         } else {
-            menu.classList.add("openMenu");
-            this.menuOpen = true;
-            this.manualOpen = true;
+            this.setManualOpen(true);
             return;
+        }
+    },
+    /**
+     * Update the visual state of the menu. This is called by the setters of hovering and manualOpen.
+     */
+    updateMenuState: function() {
+        var menu = document.getElementById("osm" + this.config.menuName);
+        if (this.getMenuOpen()) {
+            menu.classList.add("openMenu");
+        } else {
+            this.clearSelection();
+            menu.classList.remove("openMenu");
         }
     },
 
@@ -258,7 +274,7 @@ Module.register("MMM-OnScreenMenu", {
     },
 
     selectMenuItem: function(direction = 1) {
-        if (!this.menuOpen) {
+        if (!this.getMenuOpen()) {
             return false;
         }
 
@@ -284,8 +300,7 @@ Module.register("MMM-OnScreenMenu", {
     },
 
     mouseenterCB: function() {
-        this.hovering = true;
-        this.menuOpen = true;
+        this.setHovering(true);
         if (this.config.enableKeyBindings &&
             this.currentKeyPressMode !== this.config.keyBindingsMode) {
             this.keyPressFocusReceived();
@@ -293,9 +308,8 @@ Module.register("MMM-OnScreenMenu", {
     },
 
     mouseoutCB: function() {
-        this.hovering = false;
-        this.menuOpen = this.manualOpen;
-        if (this.config.enableKeyBindings && !this.menuOpen &&
+        this.setHovering(false);
+        if (this.config.enableKeyBindings && !this.getMenuOpen() &&
             this.currentKeyPressMode === this.config.keyBindingsMode) {
             this.keyPressReleaseFocus();
         }
@@ -477,7 +491,7 @@ Module.register("MMM-OnScreenMenu", {
         // console.log(this.name + "HAS FOCUS!");
         this.sendNotification("KEYPRESS_MODE_CHANGED", this.config.keyBindingsMode);
         this.currentKeyPressMode = this.config.keyBindingsMode;
-        if (!this.menuOpen) { this.toggleMenu(); }
+        if (!this.getMenuOpen()) { this.toggleMenu(); }
     },
 
     keyPressReleaseFocus: function() {
