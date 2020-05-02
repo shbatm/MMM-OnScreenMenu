@@ -69,6 +69,24 @@ var config = {
 | `menuItems` | See [Menu Items](#menu-items) below.
 | `pm2ProcessName` | The pm2 Process Name to control using `STOP` and `RESTART` menu items. <br>*Default:* `"mm"`
 
+### Custom Monitor Configuration options
+For backward compatibility, the default monitor control is implemented via [tvservice](https://github.com/raspberrypi/documentation/blob/master/raspbian/applications/tvservice.md)
+however it is recommended to use [vcgencmd](https://github.com/raspberrypi/documentation/blob/master/raspbian/applications/vcgencmd.md)
+particularly if you have multiple HDMI ports like the Pi4 or similar devices and you need to be specific about which HMDI port you want to control.
+e.g. The following command turns on the monitor on the first HDMI port known as 2.
+```bash
+vcgencmd display_power 1 2
+```
+
+
+| Option                | Description
+|-----------------------|-----------
+| `monitorOnCommand` | *Optional* - Command to to use for turning monitor on. <br>*Default:* "tvservice --preferred && sudo chvt 6 && sudo chvt 7"
+| `monitorOffCommand` | *Optional* - Command to to use for turning the monitor off. <br>*Default:* "tvservice -o"
+| `monitorStatusCommand` | *Optional* - Command to to use for checking the monitor status. <br>*Default:* "tvservice --status"
+
+Although above options are optional, you typically want to specify all three if you are not using the defaults.
+
 ### Menu Items <a name="menu-items"></a>
 
 #### Default Menu:
