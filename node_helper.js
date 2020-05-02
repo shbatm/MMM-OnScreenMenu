@@ -30,27 +30,27 @@ module.exports = NodeHelper.create({
 
         switch (payload) {
             case "monitorOn":
-                screenStatus = exec("tvservice --status", opts,
+                screenStatus = exec(this.config.monitorStatusCommand, opts,
                     function(error, stdout, stderr) {
                         if (stdout.indexOf("TV is off") !== -1) {
                             // Screen is OFF, turn it ON
-                            exec("tvservice --preferred && sudo chvt 6 && sudo chvt 7", opts, (error, stdout, stderr) => { self.checkForExecError(error, stdout, stderr); });
+                            exec(this.config.monitorOnCommand, opts, (error, stdout, stderr) => { self.checkForExecError(error, stdout, stderr); });
                         }
                         self.checkForExecError(error, stdout, stderr);
                     });
                 break;
             case "monitorOff":
-                exec("tvservice -o", opts, (error, stdout, stderr) => { self.checkForExecError(error, stdout, stderr); });
+                exec(this.config.monitorOffCommand, opts, (error, stdout, stderr) => { self.checkForExecError(error, stdout, stderr); });
                 break;
             case "monitorToggle":
-                screenStatus = exec("tvservice --status", opts,
+                screenStatus = exec(this.config.monitorStatusCommand, opts,
                     function(error, stdout, stderr) {
                         if (stdout.indexOf("TV is off") !== -1) {
                             // Screen is OFF, turn it ON
-                            exec("tvservice --preferred && sudo chvt 6 && sudo chvt 7", opts, (error, stdout, stderr) => { self.checkForExecError(error, stdout, stderr); });
+                            exec(this.config.monitorOnCommand, opts, (error, stdout, stderr) => { self.checkForExecError(error, stdout, stderr); });
                         } else if (stdout.indexOf("HDMI") !== -1) {
                             // Screen is ON, turn it OFF
-                            exec("tvservice -o", (error, stdout, stderr) => { self.checkForExecError(error, stdout, stderr); });
+                            exec(this.config.monitorOffCommand, (error, stdout, stderr) => { self.checkForExecError(error, stdout, stderr); });
                         }
                         self.checkForExecError(error, stdout, stderr);
                     });

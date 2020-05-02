@@ -20,6 +20,11 @@ Module.register("MMM-OnScreenMenu", {
         },
         enableKeyboard: true,
 
+        // Default Monitor Control Commands
+        monitorOnCommand: "tvservice --preferred && sudo chvt 6 && sudo chvt 7",
+        monitorOffCommand: "tvservice -o",
+        monitorStatusCommand: "tvservice --status",
+
         // MMM-KeyBindings Settings
         enableKeyBindings: false,
         keyBindingsMode: "OSM",
@@ -212,7 +217,7 @@ Module.register("MMM-OnScreenMenu", {
             this.changeMenuPosition(actionName.replace("changeMenuPosition_", ""));
         } else if (actionName.startsWith("delayed")) {
             if (!("actionName" in actionDetail)) {
-                actionDetail.actionName = actionName;  
+                actionDetail.actionName = actionName;
             }
             this.delayedAction(actionDetail);
         } else {
@@ -222,7 +227,7 @@ Module.register("MMM-OnScreenMenu", {
         this.toggleMenu(true);
     },
 
-    delayedAction: function (timer) {    
+    delayedAction: function (timer) {
         // Restart the timer
         if (timer.actionName in this.actionTimers) {
             clearTimeout(this.actionTimers[timer.actionName]);
@@ -357,7 +362,7 @@ Module.register("MMM-OnScreenMenu", {
 
         /* FLOATING ACTION BUTTON MENU HTML SHOULD LOOK LIKE THIS:
           <div id="menu" class="bottom_right">
-          <nav id="menuContainer" class="container" onmouseenter="mouseenterCB()" onmouseout="mouseoutCB();"> 
+          <nav id="menuContainer" class="container" onmouseenter="mouseenterCB()" onmouseout="mouseoutCB();">
             <span class="buttons item" id="monitorOff" onclick="clicked('Turn Off Display')" tooltip="Turn Off Display">
               <i class="fa fa-television" aria-hidden="true"></i></span>
             <span class="buttons item" id="restart" onclick="clicked('Restart MagicMirror')" tooltip="Restart MagicMirror">
@@ -375,7 +380,7 @@ Module.register("MMM-OnScreenMenu", {
         */
     },
 
-    /* Function to change position of the menu. 
+    /* Function to change position of the menu.
      * Not used by default, just available from demo */
     changeMenuPosition: function(newPosition) {
         var menu = document.getElementById("osm" + this.config.menuName);
@@ -392,7 +397,7 @@ Module.register("MMM-OnScreenMenu", {
         }
     },
 
-    /* Function to toggle "touchMode" of the button (always visible). 
+    /* Function to toggle "touchMode" of the button (always visible).
      * Not used by default, just available from demo */
     toggleTouchMode: function() {
         var menu = document.getElementById("osm" + this.config.menuName);
@@ -518,7 +523,7 @@ Module.register("MMM-OnScreenMenu", {
             }
 
             var existingMenu = document.getElementById('osm-menu');
-            
+
             if (!existingMenu) {
                 var wrapper = document.createElement("div");
                 wrapper.id = "osm-menu";

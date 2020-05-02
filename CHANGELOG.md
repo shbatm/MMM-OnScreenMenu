@@ -1,3 +1,5 @@
+## [UNRELEASED] - Added optional monitor control commands
+`monitorOnCommand`, `monitorOffCommand` & `monitorStatusCommand`
 ## [0.1.5] - Added "instance" option for toggling menus per #11
 
 ## [0.1.4] - Added autoCloseTimeout option as requested in #7
