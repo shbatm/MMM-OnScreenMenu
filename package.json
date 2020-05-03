@@ -22,6 +22,12 @@
   "dependencies": {
     "child_process": "^1.0.2",
     "url": "^0.11.0",
-    "pm2": "^2.6.1"
-  }
+    "pm2": "^2.6.1",
+    "snyk": "^1.317.0"
+  },
+  "scripts": {
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
+  },
+  "snyk": true
 }
