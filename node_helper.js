@@ -56,18 +56,10 @@ module.exports = NodeHelper.create({
                     });
                 break;
             case "restart":
-                this.restartMM();
-                self.sendSocketNotification("RESTART");
-                /* Old Method Below:
-                exec("pm2 restart mm", opts, (error, stdout, stderr) => {
-                    console.log("Restarting MagicMirror via pm2...");
-                    self.sendSocketNotification("RESTART");
-                    self.checkForExecError(error, stdout, stderr);
-                }); */
+                exec("sudo systemctl restart magicmirror.service", opts, (error, stdout, stderr) => { self.checkForExecError(error, stdout, stderr); });
                 break;
             case "stop" :
-                this.stopMM();
-                self.sendSocketNotification("STOP");
+                exec("sudo systemctl stop magicmirror.service", opts, (error, stdout, stderr) => { self.checkForExecError(error, stdout, stderr); });
                 break;
             case "shutdown":
                 exec("sudo shutdown -h now", opts, (error, stdout, stderr) => { self.checkForExecError(error, stdout, stderr); });
